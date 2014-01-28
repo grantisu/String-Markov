@@ -9,7 +9,7 @@ use namespace::autoclean;
 use Unicode::Normalize qw(normalize);
 use List::Util qw(sum);
 
-has normalize => (is => 'rw', default => 1);
+has normalize => (is => 'rw', default => 'C');
 has do_chomp  => (is => 'rw', default => 1);
 has null      => (is => 'ro', default => "\0");
 has order     => (is => 'ro', isa => 'Int', default => 2);
@@ -41,8 +41,8 @@ around BUILDARGS => sub {
 
 sub split_line {
 	my ($self, $sample) = @_;
-	if ($self->normalize) {
-		$sample = normalize('C', $sample);
+	if (my $norm = $self->normalize) {
+		$sample = normalize($norm, $sample);
 	}
 	return split($self->split_sep, $sample);
 }
