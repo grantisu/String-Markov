@@ -1,5 +1,7 @@
 package String::Markov;
 
+# ABSTRACT: A Moose-based, text-oriented Markov Chain module
+
 our $VERSION = 0.001;
 
 use 5.010;
@@ -140,4 +142,145 @@ sub generate_sample {
 __PACKAGE__->meta->make_immutable;
 
 1;
+
+=head1 SYNOPSIS
+
+  my $mc = String::Markov->new();
+
+  $mc->add_files(@ARGV);
+
+  print $mc->generate_sample . "\n" for (1..20);
+
+
+  my $mc = String::Markov->new(order => 1, sep => ' ');
+
+  for my $stanza (@The_Rime_of_the_Ancient_Mariner) {
+  	$mc->add_sample($stanza);
+  }
+  
+  print $mc->generate_sample;
+
+=head1 DESCRIPTION
+
+String::Markov is a Moose-based Markov Chain module, designed to easily consume
+and produce text.
+
+=method new()
+
+  # Defaults
+  my $mc = String::Markov->new(
+  	order     => 2,
+  	sep       => '',
+  	split_sep => undef,
+  	join_sep  => undef,
+  	null      => "\0",
+  	normalize => 'C',
+	do_chomp  => 1,
+  );
+
+The sep argument is used to initialize split_sep and/or join_sep, if not given.
+
+See L</ATTRIBUTES>.
+
+=method split_line()
+
+This is the method L</add_sample> calls when it is passed a non-ref argument. It
+returns an array of "states" (usually individual characters or words) that are
+used to build the Markov Chain model.
+
+The default implementation is equivalent to:
+
+  sub split_line {
+  	my ($self, $sample) = @_;
+  	$sample = normalize($self->normalize, $sample) if $self->normalize;
+  	return split($self->split_sep, $sample);
+  }
+
+This method can be overridden to deal with unusual data.
+
+=method add_sample()
+
+This method adds samples to build the Markov Chain model. It takes a single
+argument, which can be either a string or an array reference. If the argument
+is an array reference, its elements are directly used to update the Markov
+Chain. If it is a string, add_sample uses the split_line method to create an
+array of states, and then updates the Markov Chain.
+
+Note that this function generates keys for the hash that stores the transition
+matrix. The keys are built according to the order, null, and join_sep
+attributes, so if null = '!', order = 2, and join_sep = '*', then the internal
+transition matrix might look like:
+
+  {
+    '!*!' => { 'A' => 5, 'B' => 7, ... }, # Initial state
+    '!*A' => { ... },
+    '!*B' => { ... },
+    ...
+    'x*y' => { '!' => 4 },                # always end after 'xy'
+    'y*z' => { '!' => 3, 'q' => 2 },      # sometimes end after 'yz'
+    ...
+  }
+
+
+=method add_files()
+
+This is a simple convenience method, designed to replace code like:
+
+  while(<>) { chomp; $mc->add_sample($_) }
+
+It takes a list of file names as arguments, and adds them line-by-line.
+
+=method generate_sample()
+
+This method returns a sequence of states, generated from the Markov Chain using
+the Monte Carlo method.
+
+If called in scalar context, the states are joined with join_sep before being
+returned.
+
+=attr order
+
+The order of the chain, i.e. how much past state is used to determine
+the next state. The default of 2 is for reasonable for constructing new
+names/words, or for long works.
+
+=attr split_sep
+
+How states are split. This value (or sep; see L</new()>) is passed
+directly as the first argument of split, so using ' ' has special semantics.
+Regular expressions will work as well, but be aware that any matched characters
+are discarded.
+
+=attr join_sep
+
+How to re-join states. This value (or sep; see L</new()>) is passed
+directly as the first argument of join. In addition, it is used to build keys
+for internal hashes. This can cause problems in cases where split_sep produces
+sequences like ('ae', 'io'), ('a', 'ei', 'o'), or ('ae', 'i', 'o'), which will
+all turn into 'aeio' with the default join_sep. If join_sep is '*' instead,
+then three unique keys result: 'ae*io', 'a*ei*o', and 'ae*i*o'. See
+L</add_sample()>.
+
+=attr null
+
+What is used to track the beginning and end of a sample. The default of
+"\0" should work for UTF-8 text, but may cause problems with UTF-16 or other
+encodings.
+
+=attr normalize
+
+Whether to normalize Unicode strings. This value, if true, is passed as the
+first argument to Unicode::Normalize::normalize. The default 'C' should do what
+most people expect, but it may be the case that 'D' is what you want. If you're
+not using Unicode, set this to undef.
+
+=attr do_chomp
+
+Whether to chomp lines when reading files. See L</add_files()>.
+
+=head1 SEE ALSO
+
+=for :list
+* L<Algorithm::MarkovChain>
+
 
