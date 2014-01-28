@@ -92,7 +92,7 @@ sub add_files {
 	return $self;
 }
 
-sub next_state {
+sub sample_next_state {
 	my ($self, @cur_state) = @_;
 	die "ERR: wrong amount of state" if @cur_state != $self->order;
 
@@ -115,7 +115,7 @@ sub next_state {
 	return $k
 }
 
-sub walk_chain {
+sub generate_sample {
 	my ($self) = @_;
 
 	my $null = $self->null;
@@ -124,7 +124,7 @@ sub walk_chain {
 	my @nm = ($null,) x $n;
 
 	do {
-		push @nm, $self->next_state(@nm[-$n .. -1]);
+		push @nm, $self->sample_next_state(@nm[-$n .. -1]);
 	} while ($nm[-1] ne $null);
 
 	@nm = @nm[$n .. ($#nm-1)];
