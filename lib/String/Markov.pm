@@ -10,6 +10,7 @@ use Unicode::Normalize qw(normalize);
 use List::Util qw(sum);
 
 has normalize => (is => 'rw', default => 1);
+has do_chomp  => (is => 'rw', default => 1);
 has null      => (is => 'ro', default => "\0");
 has order     => (is => 'ro', isa => 'Int', default => 2);
 
@@ -80,10 +81,11 @@ sub add_sample {
 
 sub add_files {
 	my ($self, @files) = @_;
+	my $do_chomp = $self->do_chomp;
 
 	local @ARGV = @files;
 	while(my $sample = <>) {
-		chomp $sample;
+		chomp $sample if $do_chomp;
 		$self->add_sample($sample);
 	}
 
