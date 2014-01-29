@@ -63,6 +63,11 @@ for (1..10) {
 
 throws_ok( sub { $mc->sample_next_state       }, qr/wrong amount/i, 'Complain about not enough state');
 throws_ok( sub { $mc->sample_next_state(1..3) }, qr/wrong amount/i, 'Complain about too much state');
+throws_ok( sub { $mc->add_sample({ hash => 'ref'}) }, qr/err.*hash/i, 'Fail to add hash ref');
+throws_ok( sub {
+	$mc->split_sep(undef);
+	$mc->add_sample($snowman);
+}, qr/err.*spli/i, 'Fail to add string with no split_sep');
 
 ####################
     $mc = undef;
@@ -97,6 +102,15 @@ for (1..3) {
 $mc->add_sample(['Here are', 'some words']);
 is($mc->sample_next_state('Here are'), 'some words', "Manually splitting samples works");
 
+# TODO: see if this is really the correct behavior; maybe should throw error?
+lives_ok( sub {
+	$mc->join_sep(undef);
+	$mc->add_sample(['No join_sep', 'used']);
+	$mc->generate_sample();
+}, 'Disabling join_sep works');
+is($mc->sample_next_state('No join_sep'), 'used', "State actually added without join_sep");
+
+
 ####################
     $mc = undef;
 ####################
@@ -108,6 +122,10 @@ is($mc->generate_sample, "One bit of text.", "chomp works");
 $mc = new_ok($smkv, [do_chomp => 0]);
 lives_ok( sub { $mc->add_files('t/twolines.txt') }, 'Adding file list');
 is($mc->generate_sample, "One bit of text.\n", "skipping chomp works");
+
+$mc = new_ok($smkv, [normalize => 0]);
+lives_ok( sub { $mc->add_files('t/twolines.txt') }, 'Adding file list');
+is($mc->generate_sample, "One bit of text.", "skipping normalize works");
 
 done_testing();
 
