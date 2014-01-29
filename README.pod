@@ -154,7 +154,7 @@ returned.
 
 =head1 AUTHOR
 
-Grant Mathews <gmathews@cpan.com>
+Grant Mathews <gmathews@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
