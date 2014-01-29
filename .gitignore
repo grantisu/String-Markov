@@ -1,2 +1,4 @@
 .*.sw?
+.build
 .sw?
+String-Markov-*
