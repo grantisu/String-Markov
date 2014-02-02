@@ -155,7 +155,7 @@ being returned.
 
 =head1 SEE ALSO
 
-=for :list * L<Algorithm::MarkovChain>
+L<Algorithm::MarkovChain>
 
 =head1 AUTHOR
 

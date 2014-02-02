@@ -285,7 +285,6 @@ Whether to L<perlfunc/chomp> lines when reading files. See L</add_files()>.
 
 =head1 SEE ALSO
 
-=for :list
-* L<Algorithm::MarkovChain>
+L<Algorithm::MarkovChain>
 
 
