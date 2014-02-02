@@ -2,7 +2,7 @@ package String::Markov;
 
 # ABSTRACT: A Moose-based, text-oriented Markov Chain module
 
-our $VERSION = 0.004;
+our $VERSION = 0.005;
 
 use 5.010;
 use Moose;
