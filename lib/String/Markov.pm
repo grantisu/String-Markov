@@ -178,14 +178,15 @@ and produce text.
 	do_chomp  => 1,
   );
 
-The sep argument is used to initialize split_sep and/or join_sep, if not given.
+The I<sep> argument doesn't correlate to an attribute, but is used to
+initialize I<split_sep> or I<join_sep> if either is undefined.
 
 See L</ATTRIBUTES>.
 
 =method split_line()
 
-This is the method L</add_sample> calls when it is passed a non-ref argument. It
-returns an array of "states" (usually individual characters or words) that are
+This is the method L</add_sample()> calls when it is passed a non-ref argument.
+It returns an array of states (usually individual characters or words) that are
 used to build the Markov Chain model.
 
 The default implementation is equivalent to:
@@ -203,13 +204,17 @@ This method can be overridden to deal with unusual data.
 This method adds samples to build the Markov Chain model. It takes a single
 argument, which can be either a string or an array reference. If the argument
 is an array reference, its elements are directly used to update the Markov
-Chain. If it is a string, add_sample uses the split_line method to create an
-array of states, and then updates the Markov Chain.
+Chain. If it is a string, add_sample() uses the split_line() method to create
+an array of states, and then updates the Markov Chain.
 
-Note that this function generates keys for the hash that stores the transition
-matrix. The keys are built according to the order, null, and join_sep
-attributes, so if null = '!', order = 2, and join_sep = '*', then the internal
-transition matrix might look like:
+Note that this function generates hash keys for the transition matrix. The keys
+are built according to the I<order>, I<null>, and I<join_sep> attributes, so if
+an instance is created with:
+
+  my $mc = String::Markov->new(null => '!', order => 2, join_sep => '*');
+  $mc->add_sample($_) for (@sample_lines);
+
+Then the internal transition matrix might look like:
 
   {
     '!*!' => { 'A' => 5, 'B' => 7, ... }, # Initial state
@@ -235,48 +240,48 @@ It takes a list of file names as arguments, and adds them line-by-line.
 This method returns a sequence of states, generated from the Markov Chain using
 the Monte Carlo method.
 
-If called in scalar context, the states are joined with join_sep before being
-returned.
+If called in scalar context, the states are joined with I<join_sep> before
+being returned.
 
 =attr order
 
-The order of the chain, i.e. how much past state is used to determine
-the next state. The default of 2 is for reasonable for constructing new
-names/words, or for long works.
+The order of the chain, i.e. how much past state is used to determine the next
+state. The default of 2 is for reasonable for constructing new names/words when
+splitting into characters, or for long-ish works when splitting into words.
 
 =attr split_sep
 
-How states are split. This value (or sep; see L</new()>) is passed
-directly as the first argument of split, so using ' ' has special semantics.
+How states are split. This value (or I<sep>; see L</new()>) is passed directly
+as the first argument of L<perlfunc/split>, so using ' ' has special semantics.
 Regular expressions will work as well, but be aware that any matched characters
 are discarded.
 
 =attr join_sep
 
-How to re-join states. This value (or sep; see L</new()>) is passed
-directly as the first argument of join. In addition, it is used to build keys
-for internal hashes. This can cause problems in cases where split_sep produces
-sequences like ('ae', 'io'), ('a', 'ei', 'o'), or ('ae', 'i', 'o'), which will
-all turn into 'aeio' with the default join_sep. If join_sep is '*' instead,
-then three unique keys result: 'ae*io', 'a*ei*o', and 'ae*i*o'. See
-L</add_sample()>.
+How to re-join states. This value (or I<sep>; see L</new()>) is passed directly
+as the first argument of L<perlfunc/join>. In addition, it is used to build
+keys for internal hashes. This can cause problems in cases where split_sep()
+produces sequences like C<'ae', 'io'>, C<'a', 'ei', 'o'>, or C<'ae', 'i', 'o'>,
+which will all turn into C<'aeio'> with the default if C<''>. If I<join_sep> is
+C<'*'> instead, then three unique keys result: C<'ae*io'>, C<'a*ei*o'>, and
+C<'ae*i*o'>. See L</add_sample()>.
 
 =attr null
 
-What is used to track the beginning and end of a sample. The default of
-"\0" should work for UTF-8 text, but may cause problems with UTF-16 or other
+What is used to track the beginning and end of a sample. The default of C<"\0">
+should work for UTF-8 text, but may cause problems with UTF-16 or other
 encodings.
 
 =attr normalize
 
 Whether to normalize Unicode strings. This value, if true, is passed as the
-first argument to Unicode::Normalize::normalize. The default 'C' should do what
-most people expect, but it may be the case that 'D' is what you want. If you're
-not using Unicode, set this to undef.
+first argument to Unicode::Normalize::normalize. The default C<'C'> should do
+what most people expect, but it may be the case that C<'D'> is what you want.
+If you're not using Unicode, set this to undef.
 
 =attr do_chomp
 
-Whether to chomp lines when reading files. See L</add_files()>.
+Whether to L<perlfunc/chomp> lines when reading files. See L</add_files()>.
 
 =head1 SEE ALSO
 
