@@ -4,7 +4,7 @@
 
 =head1 NAME
 
-String::Markov - A Moose-based, text-oriented Markov Chain module
+String::Markov - A Moo-based, text-oriented Markov Chain module
 
 =head1 VERSION
 
@@ -29,7 +29,7 @@ version 0.005
 
 =head1 DESCRIPTION
 
-String::Markov is a Moose-based Markov Chain module, designed to easily consume
+String::Markov is a Moo-based Markov Chain module, designed to easily consume
 and produce text.
 
 =head1 ATTRIBUTES

@@ -1,11 +1,11 @@
 package String::Markov;
 
-# ABSTRACT: A Moose-based, text-oriented Markov Chain module
+# ABSTRACT: A Moo-based, text-oriented Markov Chain module
 
 our $VERSION = 0.005;
 
 use 5.010;
-use Moose;
+use Moo;
 use namespace::autoclean;
 
 use Unicode::Normalize qw(normalize);
@@ -14,7 +14,9 @@ use List::Util qw(sum);
 has normalize => (is => 'rw', default => 'C');
 has do_chomp  => (is => 'rw', default => 1);
 has null      => (is => 'ro', default => "\0");
-has order     => (is => 'ro', isa => 'Int', default => 2);
+has order     => (is => 'ro', isa => sub {
+	die "Need an integer greater than zero" if !$_[0] || $_[0] =~ /\D/;
+}, default => 2);
 
 has ['split_sep','join_sep'] => (
 	is => 'rw',
@@ -23,7 +25,7 @@ has ['split_sep','join_sep'] => (
 
 has ['transition_count','row_sum'] => (
 	is => 'ro',
-	isa => 'HashRef',
+	isa => sub { die "Need a hash ref" if ref $_[0] ne 'HASH'; },
 	default => sub { {} }
 );
 
@@ -162,7 +164,7 @@ __PACKAGE__->meta->make_immutable;
 
 =head1 DESCRIPTION
 
-String::Markov is a Moose-based Markov Chain module, designed to easily consume
+String::Markov is a Moo-based Markov Chain module, designed to easily consume
 and produce text.
 
 =method new()
