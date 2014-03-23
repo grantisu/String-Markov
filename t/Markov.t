@@ -62,6 +62,7 @@ for (1..10) {
 }
 
 throws_ok( sub { $mc->sample_next_state       }, qr/wrong amount/i, 'Complain about not enough state');
+throws_ok( sub { $mc->sample_next_state       }, qr/wrong amount/i, 'Complain about not enough state');
 throws_ok( sub { $mc->sample_next_state(1..3) }, qr/wrong amount/i, 'Complain about too much state');
 throws_ok( sub { $mc->add_sample({ hash => 'ref'}) }, qr/err.*hash/i, 'Fail to add hash ref');
 throws_ok( sub {
@@ -126,6 +127,10 @@ is($mc->generate_sample, "One bit of text.\n", "skipping chomp works");
 $mc = new_ok($smkv, [normalize => 0]);
 lives_ok( sub { $mc->add_files('t/twolines.txt') }, 'Adding file list');
 is($mc->generate_sample, "One bit of text.", "skipping normalize works");
+
+throws_ok( sub { $mc = $smkv->new(order =>   0); }, qr/zero/i,                        'Complain about zero order attr');
+throws_ok( sub { $mc = $smkv->new(order => 2.5); }, qr/integer/i,                     'Complain about non-integer order attr');
+throws_ok( sub { $mc = $smkv->new(order =>  -1); }, qr/(positive|greater|negative)/i, 'Complain about negative order attr');
 
 done_testing();
 
