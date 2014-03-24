@@ -127,6 +127,8 @@ sub add_files {
 		$self->add_sample($sample);
 	}
 
+	$self->split_all_prob();
+
 	return $self;
 }
 
