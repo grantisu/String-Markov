@@ -61,6 +61,17 @@ sub split_prob {
 	];
 }
 
+sub split_all_prob {
+	my $self = shift;
+	my $tc = $self->transition_count;
+	my $nt = {};
+
+	while (my ($state, $prob) = each %$tc) {
+		$nt->{$state} = $self->split_prob($prob);
+	}
+
+	%$tc = %$nt;
+}
 
 sub split_line {
 	my ($self, $sample) = @_;
