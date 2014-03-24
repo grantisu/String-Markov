@@ -43,6 +43,25 @@ around BUILDARGS => sub {
 	return $class->$orig(\%ahash);
 };
 
+sub join_prob {
+	my ($self, $orig_prob) = @_;
+	my %p;
+
+	@p{@{$orig_prob->[0]}} = @{$orig_prob->[1]};
+
+	return \%p;
+}
+
+sub split_prob {
+	my ($self, $orig_prob) = @_;
+
+	return [
+		[keys %$orig_prob],
+		[values %$orig_prob],
+	];
+}
+
+
 sub split_line {
 	my ($self, $sample) = @_;
 	if (my $norm = $self->normalize) {
@@ -76,6 +95,10 @@ sub add_sample {
 	for my $i (0 .. ($#nms - $n)) {
 		my $cur = join($sep, @nms[$i .. ($i + $n - 1)]);
 		my $nxt = $nms[$i + $n];
+		my $prob = $count->{$cur};
+		if ($prob && ref $prob ne 'HASH') {
+			$count->{$cur} = $self->join_prob($prob);
+		}
 		++$count->{$cur}{$nxt};
 		++$sum->{$cur};
 	}
@@ -107,16 +130,21 @@ sub sample_next_state {
 	my $thresh = $sum->{$cur};
 	return undef if !$thresh;
 
-	my $s = 0;
 	$thresh *= rand();
+
 	my $prob = $count->{$cur};
-	keys %$prob;
-	my ($k, $v);
-	while ($thresh > $s) {
-		($k, $v) = each %$prob;
-		$s += $v;
+	if (ref $prob ne 'ARRAY') {
+		$prob = $self->split_prob($prob);
+		$count->{$cur} = $prob;
 	}
-	return $k
+
+	my $s = 0;
+	my $i = 0;
+	my ($k, $v) = @{$prob};
+	do {
+		$s += $v->[$i];
+	} while ($thresh > $s && ++$i);
+	return $k->[$i];
 }
 
 sub generate_sample {
