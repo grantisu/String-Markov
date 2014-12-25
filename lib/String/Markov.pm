@@ -11,12 +11,12 @@ use namespace::autoclean;
 use Unicode::Normalize qw(normalize);
 use List::Util qw(sum);
 
-has normalize => (is => 'rw', default => 'C');
-has do_chomp  => (is => 'rw', default => 1);
-has null      => (is => 'ro', default => "\0");
+has normalize => (is => 'rw', default => sub { 'C' });
+has do_chomp  => (is => 'rw', default => sub { 1 });
+has null      => (is => 'ro', default => sub { "\0" });
 has order     => (is => 'ro', isa => sub {
 	die "Need an integer greater than zero" if !$_[0] || $_[0] =~ /\D/;
-}, default => 2);
+}, default => sub { 2 });
 
 has ['split_sep','join_sep'] => (
 	is => 'rw',
