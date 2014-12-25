@@ -1,7 +1,5 @@
 =pod
 
-=encoding UTF-8
-
 =head1 NAME
 
 String::Markov - A Moo-based, text-oriented Markov Chain module
@@ -169,4 +167,3 @@ This is free software, licensed under:
 
   The Artistic License 2.0 (GPL Compatible)
 
-=cut
