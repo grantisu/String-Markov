@@ -25,6 +25,7 @@ my %attr_def = (
 	normalize => 'C',
 	do_chomp  =>  1,
 	null      =>  "\0",
+	stable    =>  1,
 	order     =>  2,
 	split_sep => '',
 	join_sep  => '',
@@ -131,6 +132,56 @@ is($mc->generate_sample, "One bit of text.", "skipping normalize works");
 throws_ok( sub { $mc = $smkv->new(order =>   0); }, qr/zero/i,                        'Complain about zero order attr');
 throws_ok( sub { $mc = $smkv->new(order => 2.5); }, qr/integer/i,                     'Complain about non-integer order attr');
 throws_ok( sub { $mc = $smkv->new(order =>  -1); }, qr/(positive|greater|negative)/i, 'Complain about negative order attr');
+
+
+my ($mc1, $mc2);
+
+lives_ok( sub {
+	$mc1 = $smkv->new(stable => 1);
+	$mc1->add_files('t/fivelines.txt');
+
+	$mc2 = $smkv->new(stable => 1);
+	$mc2->add_files('t/fivelines.txt');
+}, "Can create stable chains");
+
+lives_ok( sub {
+	my @seeds = map { int(rand(1000000)) } 1..200;
+
+	foreach my $seed (@seeds) {
+		srand($seed);
+		my $s1 = $mc1->generate_sample;
+
+		srand($seed);
+		my $s2 = $mc2->generate_sample;
+
+		die "'$s1' != '$s2'; seed was: $seed" if $s1 ne $s2;
+	}
+}, "Stable chains produce stable output");
+
+lives_ok( sub {
+	$mc1 = $smkv->new(stable => 0);
+	$mc1->add_files('t/fivelines.txt');
+
+	$mc2 = $smkv->new(stable => 0);
+	$mc2->add_files('t/fivelines.txt');
+}, "Can create unstable chains");
+
+
+# Note: this test relies on hash randomization, which should be guaranteed by
+# the 'use v5.012' up top
+throws_ok( sub {
+	my @seeds = map { int(rand(1000000)) } 1..2000;
+
+	foreach my $seed (@seeds) {
+		srand($seed);
+		my $s1 = $mc1->generate_sample;
+
+		srand($seed);
+		my $s2 = $mc2->generate_sample;
+
+		die "'$s1' != '$s2'; seed was: $seed" if $s1 ne $s2;
+	}
+}, qr/seed was/, "Unstable chains produce different output");
 
 done_testing();
 

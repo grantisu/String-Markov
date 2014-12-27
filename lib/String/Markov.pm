@@ -14,6 +14,7 @@ use List::Util qw(sum);
 has normalize => (is => 'rw', default => sub { 'C' });
 has do_chomp  => (is => 'rw', default => sub { 1 });
 has null      => (is => 'ro', default => sub { "\0" });
+has stable    => (is => 'ro', default => sub { 1 });
 has order     => (is => 'ro', isa => sub {
 	die "Need an integer greater than zero" if !$_[0] || $_[0] =~ /\D/;
 }, default => sub { 2 });
@@ -55,10 +56,18 @@ sub join_prob {
 sub split_prob {
 	my ($self, $orig_prob) = @_;
 
-	return [
-		[keys %$orig_prob],
-		[values %$orig_prob],
-	];
+	if ($self->stable) {
+		my @k = sort keys %$orig_prob;
+		return [
+			\@k,
+			[@{$orig_prob}{@k}],
+		];
+	} else {
+		return [
+			[keys %$orig_prob],
+			[values %$orig_prob],
+		];
+	}
 }
 
 sub split_all_prob {
@@ -217,6 +226,7 @@ and produce text.
   	split_sep => undef,
   	join_sep  => undef,
   	null      => "\0",
+	stable    =>  1,
   	normalize => 'C',
 	do_chomp  => 1,
   );
@@ -314,6 +324,12 @@ C<'ae*i*o'>. See L</add_sample()>.
 What is used to mark the beginning and end of a sample internally. The default
 of C<"\0"> should work for UTF-8 text, but may cause problems with UTF-16 or
 other encodings.
+
+=attr stable
+
+Whether or not to always produce the same results from the same internal state.
+If stable is true, then the same random seed (see L<perlfunc/srand>) will
+produce identical results for chains created from the same inputs.
 
 =attr normalize
 

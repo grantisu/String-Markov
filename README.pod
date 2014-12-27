@@ -61,6 +61,12 @@ What is used to mark the beginning and end of a sample internally. The default
 of C<"\0"> should work for UTF-8 text, but may cause problems with UTF-16 or
 other encodings.
 
+=head2 stable
+
+Whether or not to always produce the same results from the same internal state.
+If stable is true, then the same random seed (see L<perlfunc/srand>) will
+produce identical results for chains created from the same inputs.
+
 =head2 normalize
 
 Whether to normalize Unicode strings. This value, if true, is passed as the
@@ -83,6 +89,7 @@ Whether to L<perlfunc/chomp> lines when reading files. See L</add_files()>.
   	split_sep => undef,
   	join_sep  => undef,
   	null      => "\0",
+	stable    =>  1,
   	normalize => 'C',
 	do_chomp  => 1,
   );
