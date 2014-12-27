@@ -167,21 +167,25 @@ lives_ok( sub {
 }, "Can create unstable chains");
 
 
-# Note: this test relies on hash randomization, which should be guaranteed by
-# the 'use v5.012' up top
-throws_ok( sub {
-	my @seeds = map { int(rand(1000000)) } 1..2000;
+# # This test relies on hash randomization, which is only in v5.18+ and can
+# # be disabled via environment variables and configuration options.
+# # Since it doesn't really test the proper functioning of this module,
+# # may as well skip it.
+# 
+# throws_ok( sub {
+# 	my @seeds = map { int(rand(1000000)) } 1..2000;
+# 
+# 	foreach my $seed (@seeds) {
+# 		srand($seed);
+# 		my $s1 = $mc1->generate_sample;
+# 
+# 		srand($seed);
+# 		my $s2 = $mc2->generate_sample;
+# 
+# 		#die "'$s1' != '$s2'; seed was: $seed" if $s1 ne $s2;
+# 	}
+# }, qr/seed was/, "Unstable chains produce different output");
 
-	foreach my $seed (@seeds) {
-		srand($seed);
-		my $s1 = $mc1->generate_sample;
-
-		srand($seed);
-		my $s2 = $mc2->generate_sample;
-
-		die "'$s1' != '$s2'; seed was: $seed" if $s1 ne $s2;
-	}
-}, qr/seed was/, "Unstable chains produce different output");
 
 done_testing();
 
